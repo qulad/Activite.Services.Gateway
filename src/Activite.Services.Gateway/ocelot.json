@@ -1,0 +1,51 @@
+{
+    "GlobalConfiguration": {
+        "BaseUrl": "https://host.docker.internal:5000",
+        "ServiceDiscoveryProvider": {
+            "Host": "http://host.docker.internal",
+            "Port": 8500,
+            "Type": "Consul"
+        }
+    },
+    "routes": [
+        {
+            "useServiceDisocery": true,
+            "serviceName": "activite-user-predictor",
+            "DownstreamPathTemplate": "/userPredictions/{everything}",
+            "DownstreamScheme": "https",
+            "UpstreamPathTemplate": "/userPredictions/{everything}",
+            "UpstreamHttpMethod": [
+                "Get",
+                "POST",
+                "PUT",
+                "DELETE"
+            ]
+        },
+        {
+            "useServiceDisocery": true,
+            "serviceName": "activite-user",
+            "DownstreamPathTemplate": "/users/{everything}",
+            "DownstreamScheme": "https",
+            "UpstreamPathTemplate": "/users/{everything}",
+            "UpstreamHttpMethod": [
+                "Get",
+                "POST",
+                "PUT",
+                "DELETE"
+            ]
+        },
+        {
+            "useServiceDisocery": true,
+            "serviceName": "activite-integrations",
+            "DownstreamPathTemplate": "/integrations/{everything}",
+            "DownstreamScheme": "https",
+            "UpstreamPathTemplate": "/integrations/{everything}",
+            "UpstreamHttpMethod": [
+                "Get",
+                "POST",
+                "PUT",
+                "DELETE"
+            ]
+        }
+    ]
+}
