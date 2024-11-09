@@ -15,6 +15,7 @@
     <PackageReference Include="Convey.WebApi" Version="1.1.448" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Ocelot" Version="23.3.6" />
+    <PackageReference Include="Ocelot.Provider.Consul" Version="23.3.6" />
   </ItemGroup>
 
 </Project>
