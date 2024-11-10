@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Activite.Services.Gateway.DTOs;
+using Activite.Services.Gateway.DTOs.Integration;
 using Convey.HTTP;
 
 namespace Activite.Services.Gateway.Services;

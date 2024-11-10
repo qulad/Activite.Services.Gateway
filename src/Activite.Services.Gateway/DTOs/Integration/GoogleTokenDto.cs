@@ -1,4 +1,4 @@
-namespace Activite.Services.Gateway.DTOs;
+namespace Activite.Services.Gateway.DTOs.Integration;
 
 public class GoogleTokenDto
 {

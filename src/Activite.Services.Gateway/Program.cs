@@ -40,6 +40,7 @@ var host = WebHost.CreateDefaultBuilder(args)
 
         services
             .AddTransient<IntegrationService>()
+            .AddTransient<UserService>()
             .AddConvey()
             .AddWebApi()
             .AddHttpClient()
@@ -53,6 +54,7 @@ var host = WebHost.CreateDefaultBuilder(args)
             .UseEndpoints(endpoints => endpoints
                 .Get("/ping", ctx => ctx.Response.WriteAsync("pong")))
             .UseMiddleware<TokenMiddleware>()
+            .UseMiddleware<AuthorityMiddleware>()
             .UseOcelot().Wait();
     })
     .UseLogging()

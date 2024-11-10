@@ -1,3 +1,4 @@
+using Activite.Services.Gateway.Constants;
 using Activite.Services.Gateway.Contexts;
 using Activite.Services.Gateway.DTOs;
 using Activite.Services.Gateway.Options;
@@ -186,8 +187,8 @@ public class TokenMiddleware
 
         var validation = tokenProvider switch
         {
-            "Google" => await ValidateGoogleTokenAsync(jwtToken),
-            "Apple" => await ValidateAppleTokenAsync(jwtToken),
+            TokenProviders.Apple => await ValidateAppleTokenAsync(jwtToken),
+            TokenProviders.Google => await ValidateGoogleTokenAsync(jwtToken),
             _ => new Validation
             {
                 IsValid = false

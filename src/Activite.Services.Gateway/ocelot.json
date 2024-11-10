@@ -20,6 +20,19 @@
                 "PUT",
                 "DELETE"
             ]
+        },
+        {
+            "useServiceDiscovery": true,
+            "serviceName": "activite-user",
+            "DownstreamPathTemplate": "/{everything}",
+            "DownstreamScheme": "http",
+            "UpstreamPathTemplate": "/users/{everything}",
+            "UpstreamHttpMethod": [
+                "Get",
+                "POST",
+                "PUT",
+                "DELETE"
+            ]
         }
     ]
 }
