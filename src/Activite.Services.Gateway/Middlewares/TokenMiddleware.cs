@@ -166,7 +166,7 @@ public class TokenMiddleware
             return;
         }
 
-        if (tokenProvider is not ("Google" or "Apple"))
+        if (tokenProvider is not (TokenProviders.Google or TokenProviders.Apple))
         {
             _logger.LogWarning("Current 'Token-Provider' is not supported");
 
