@@ -62,40 +62,9 @@ public class AuthorityMiddleware
             return;
         }
 
-        var userId = Guid.Empty;
+        var users = await _userService.GetUser(validationContext.UserEmail);
 
-        if (validationContext.TokenProvider == TokenProviders.Google)
-        {
-            var users = await _userService.GetGoogleUser(validationContext.UserEmail, validationContext.UserId);
-
-            if (users is not null && !users.IsEmpty)
-            {
-                if (users.TotalResults > 1)
-                {
-                    _logger.LogWarning("Total user count is more then one for {Email}", validationContext.UserEmail);
-                }
-
-                userId = users.Items.First().Id;
-            }
-        }
-        else if (validationContext.TokenProvider == TokenProviders.Apple)
-        {
-            var users = await _userService.GetAppleUser(validationContext.UserEmail, validationContext.UserId);
-
-            if (users is not null && !users.IsEmpty)
-            {
-                if (users.TotalResults > 1)
-                {
-                    _logger.LogWarning("Total user count is more then one for {Email}", validationContext.UserEmail);
-                }
-
-                userId = users.Items.First().Id;
-            }
-        }
-
-        var isUserValid = userId != Guid.Empty;
-
-        if (!isUserValid)
+        if (users is null || users.IsEmpty || users.TotalResults > 1)
         {
             if (context.Request.Method == HttpMethods.Post && IsUrlUserCreateUrl(context))
             {
@@ -126,6 +95,8 @@ public class AuthorityMiddleware
             return;
         }
 
+        var user = users.Items.First();
+
         try
         {
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true);
@@ -134,7 +105,7 @@ public class AuthorityMiddleware
 
             if (string.IsNullOrEmpty(requestBody))
             {
-                using var stream = CreateDefaultBody(userId);
+                using var stream = CreateDefaultBody(user);
 
                 context.Request.ContentLength = stream.Length;
                 context.Request.Body = stream;
@@ -153,7 +124,7 @@ public class AuthorityMiddleware
 
             if (jsonObject is null)
             {
-                using var stream = CreateDefaultBody(userId);
+                using var stream = CreateDefaultBody(user);
 
                 context.Request.ContentLength = stream.Length;
                 context.Request.Body = stream;
@@ -163,9 +134,17 @@ public class AuthorityMiddleware
                 return;
             }
 
-            if (jsonObject["userid"] is null)
+            var key = user.Type switch
             {
-                using var stream = CreateDefaultBody(userId);
+                UserTypes.AppleCustomer => "userid",
+                UserTypes.GoogleCustomer => "userid",
+                UserTypes.GoogleLocation => "locationid",
+                _ => null
+            };
+
+            if (key is null)
+            {
+                using var stream = CreateDefaultBody(user);
 
                 context.Request.ContentLength = stream.Length;
                 context.Request.Body = stream;
@@ -175,7 +154,19 @@ public class AuthorityMiddleware
                 return;
             }
 
-            if (jsonObject["userid"].ToString() != userId.ToString())
+            if (jsonObject[key] is null)
+            {
+                using var stream = CreateDefaultBody(user);
+
+                context.Request.ContentLength = stream.Length;
+                context.Request.Body = stream;
+
+                await _next(context);
+
+                return;
+            }
+
+            if (jsonObject[key].ToString() != user.Id.ToString())
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 
@@ -231,11 +222,23 @@ public class AuthorityMiddleware
         return requestBody;
     }
 
-    private static Stream CreateDefaultBody(Guid userId)
+    private static Stream CreateDefaultBody(UserDto user)
     {
-        var body = new DefaultRequestBody
+        IDefaultRequestBody body = user.Type switch
         {
-            UserId = userId
+            UserTypes.AppleCustomer => new DefaultCustomerRequestBody
+            {
+                UserId = user.Id
+            },
+            UserTypes.GoogleCustomer => new DefaultCustomerRequestBody
+            {
+                UserId = user.Id
+            },
+            UserTypes.GoogleLocation => new DefaultLocationRequestBody
+            {
+                LocationId = user.Id
+            },
+            _ => new DefaultRequestBody()
         };
 
         var jsonBody = JsonSerializer.Serialize(body, _jsonSerializationOptions);
@@ -252,11 +255,22 @@ public class AuthorityMiddleware
     {
         var url = context.Request.Path.ToString().ToLowerInvariant();
 
-        return url == "/users/user" || url == "/users/googleuser" || url == "/users/appleuser";
+        return url == "/users/googlecustomer" || url == "/users/googlelocation" || url == "/users/applecustomer";
     }
 }
 
-sealed file class DefaultRequestBody
+file interface IDefaultRequestBody;
+
+sealed file class DefaultRequestBody : IDefaultRequestBody
+{
+}
+
+sealed file class DefaultCustomerRequestBody : IDefaultRequestBody
 {
     public Guid UserId { get; set; }
+}
+
+sealed file class DefaultLocationRequestBody : IDefaultRequestBody
+{
+    public Guid LocationId { get; set; }
 }
