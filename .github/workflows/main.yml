@@ -1,0 +1,25 @@
+name: Activite.Services.Gateway Publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore ./Activite.Services.Gateway.sln
+
+      - name: Build
+        run: dotnet build ./Activite.Services.Gateway.sln --configuration Release --no-restore
