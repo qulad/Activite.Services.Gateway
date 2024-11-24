@@ -97,6 +97,47 @@ public class AuthorityMiddleware
 
         var user = users.Items.First();
 
+        var url = context.Request.Path.ToString().ToLowerInvariant();
+
+        if (UserTypes.Locations.Contains(user.Type))
+        {
+            if (url == "/users/ticket" || url == "/users/customercomment" || url == "/users/amountcoupon" || url == "/users/percentagecoupon")
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+                var response = new ErrorResponseDto
+                {
+                    ErrorCode = ErrorCode,
+                    ErrorMessage = "You do not have access to this resource"
+                };
+
+                var responseBody = JsonSerializer.Serialize(response, _jsonSerializationOptions);
+
+                await context.Response.WriteAsync(responseBody);
+
+                return;
+            }
+        }
+        else if (UserTypes.Customers.Contains(user.Type))
+        {
+            if (url == "/users/event" || url == "/users/offer" || url == "/users/agerestriction" || url == "/users/translation" || url == "/users/locationcomment")
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+                var response = new ErrorResponseDto
+                {
+                    ErrorCode = ErrorCode,
+                    ErrorMessage = "You do not have access to this resource"
+                };
+
+                var responseBody = JsonSerializer.Serialize(response, _jsonSerializationOptions);
+
+                await context.Response.WriteAsync(responseBody);
+
+                return;
+            }
+        }
+
         try
         {
             using var reader = new StreamReader(context.Request.Body, Encoding.UTF8, leaveOpen: true);

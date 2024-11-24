@@ -185,6 +185,30 @@ public class TokenMiddleware
             return;
         }
 
+        if (context.Request.Method == HttpMethods.Post)
+        {
+            var url = context.Request.Path.ToString().ToLowerInvariant();
+
+            if (url == "/users/amountcoupon" || url == "/users/percentagecoupon")
+            {
+                _logger.LogWarning("You cannot access this endpoint");
+
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+                var response = new ErrorResponseDto
+                {
+                    ErrorCode = ErrorCode,
+                    ErrorMessage = "You cannot access this endpoint"
+                };
+
+                var responseBody = JsonSerializer.Serialize(response, _jsonSerializationOptions);
+
+                await context.Response.WriteAsync(responseBody);
+
+                return;
+            }
+        }
+
         var validation = tokenProvider switch
         {
             TokenProviders.Apple => await ValidateAppleTokenAsync(jwtToken),
