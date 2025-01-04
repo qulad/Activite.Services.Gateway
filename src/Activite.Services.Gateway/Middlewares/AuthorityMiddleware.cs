@@ -99,6 +99,17 @@ public class AuthorityMiddleware
 
         var url = context.Request.Path.ToString().ToLowerInvariant();
 
+        if (url == "/users/me")
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
+
+            var responseBody = JsonSerializer.Serialize(user, _jsonSerializationOptions);
+
+            await context.Response.WriteAsync(responseBody);
+
+            return;
+        }
+
         if (UserTypes.Locations.Contains(user.Type))
         {
             if (url == "/users/ticket" || url == "/users/customercomment" || url == "/users/amountcoupon" || url == "/users/percentagecoupon")
