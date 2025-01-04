@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ocelot.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <PackageReference Include="Convey" Version="1.1.448" />
     <PackageReference Include="Convey.CQRS.Queries" Version="1.1.448" />
     <PackageReference Include="Convey.Discovery.Consul" Version="1.1.448" />
