@@ -1,6 +1,6 @@
 {
     "GlobalConfiguration": {
-        "BaseUrl": "http://localhost:5000",
+        "BaseUrl": "localhost:5000",
         "ServiceDiscoveryProvider": {
             "Host": "host.docker.internal",
             "Port": 8500,
